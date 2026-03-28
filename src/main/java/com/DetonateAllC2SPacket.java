@@ -5,11 +5,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 public final class DetonateAllC2SPacket {
     public DetonateAllC2SPacket() {
@@ -23,8 +22,7 @@ public final class DetonateAllC2SPacket {
         return new DetonateAllC2SPacket();
     }
 
-    public static void handle(DetonateAllC2SPacket msg, Supplier<NetworkEvent.Context> ctxSupplier) {
-        NetworkEvent.Context ctx = ctxSupplier.get();
+    public static void handle(DetonateAllC2SPacket msg, CustomPayloadEvent.Context ctx) {
         ctx.enqueueWork(() -> {
             ServerPlayer sender = ctx.getSender();
             if (sender == null) return;
@@ -46,10 +44,7 @@ public final class DetonateAllC2SPacket {
             }
 
             // Refresh the client list to empty.
-            ModNet.CHANNEL.send(
-                    PacketDistributor.PLAYER.with(() -> sender),
-                    new DetonatorPositionsS2CPacket(new ArrayList<>(list))
-            );
+            ModNet.CHANNEL.send(new DetonatorPositionsS2CPacket(new ArrayList<>(list)), PacketDistributor.PLAYER.with(sender));
         });
         ctx.setPacketHandled(true);
     }
@@ -60,4 +55,3 @@ public final class DetonateAllC2SPacket {
         return null;
     }
 }
-

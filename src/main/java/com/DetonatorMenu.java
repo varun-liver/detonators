@@ -15,15 +15,9 @@ public class DetonatorMenu extends AbstractContainerMenu {
 
     private final ArrayList<BlockPos> positions;
 
-    // Client constructor (data arrives from server via NetworkHooks.openScreen(..., buf -> ...))
-    public DetonatorMenu(int containerId, Inventory playerInventory, FriendlyByteBuf data) {
-        this(containerId, playerInventory, readPositions(data));
-    }
-
-    // Server constructor
-    public DetonatorMenu(int containerId, Inventory playerInventory, List<BlockPos> positions) {
+    public DetonatorMenu(int containerId, Inventory playerInventory) {
         super(detonators.DETONATOR_MENU.get(), containerId);
-        this.positions = new ArrayList<>(positions);
+        this.positions = new ArrayList<>();
     }
 
     public List<BlockPos> getPositions() {

@@ -41,12 +41,12 @@ public class DetonatorScreen extends AbstractContainerScreen<DetonatorMenu> {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         List<BlockPos> positions = this.menu.getPositions();
         int maxOffset = Math.max(0, positions.size() - maxLines);
-        if (maxOffset <= 0) return super.mouseScrolled(mouseX, mouseY, delta);
+        if (maxOffset <= 0) return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 
-        int next = scrollOffset + (delta < 0 ? 1 : -1);
+        int next = scrollOffset + (scrollY < 0 ? 1 : -1);
         scrollOffset = Math.max(0, Math.min(maxOffset, next));
         rebuildButtons();
         return true;
@@ -105,7 +105,7 @@ public class DetonatorScreen extends AbstractContainerScreen<DetonatorMenu> {
             int idx = i;
             int btnY = this.topPos + y - 1;
             Button b = Button.builder(Component.literal("X"), (btn) -> {
-                ModNet.CHANNEL.sendToServer(new RemoveDetonatorPosC2SPacket(idx));
+                ModNet.CHANNEL.send(new RemoveDetonatorPosC2SPacket(idx), net.minecraftforge.network.PacketDistributor.SERVER.noArg());
             }).pos(btnX, btnY).size(14, 12).build();
             removeButtons.add(b);
             this.addRenderableWidget(b);
@@ -119,7 +119,7 @@ public class DetonatorScreen extends AbstractContainerScreen<DetonatorMenu> {
         }
         boolean hasAny = !this.menu.getPositions().isEmpty();
         detonateAllButton = Button.builder(Component.literal("Detonate All"), (btn) -> {
-            ModNet.CHANNEL.sendToServer(new DetonateAllC2SPacket());
+            ModNet.CHANNEL.send(new DetonateAllC2SPacket(), net.minecraftforge.network.PacketDistributor.SERVER.noArg());
         }).pos(this.leftPos + 8, this.topPos + 92).size(90, 16).build();
         detonateAllButton.active = hasAny;
         this.addRenderableWidget(detonateAllButton);

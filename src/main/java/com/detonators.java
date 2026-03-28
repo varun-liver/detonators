@@ -10,13 +10,13 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -52,7 +52,7 @@ public class detonators {
     // Creates a new food item with the id "detonators:example_id", nutrition 1 and saturation 2
     public static final RegistryObject<Item> detonator = ITEMS.register("detonator", () -> new detonator(new Item.Properties()));
     public static final RegistryObject<MenuType<DetonatorMenu>> DETONATOR_MENU =
-            MENUS.register("detonator_menu", () -> IForgeMenuType.create((windowId, inv, data) -> new DetonatorMenu(windowId, inv, data)));
+            MENUS.register("detonator_menu", () -> new MenuType<>(DetonatorMenu::new, FeatureFlags.VANILLA_SET));
 
     // Creates a creative tab with the id "detonators:example_tab" for the example item, that is placed after the combat tab
     public static final RegistryObject<CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder().withTabsBefore(CreativeModeTabs.COMBAT).icon(() -> detonator.get().getDefaultInstance()).displayItems((parameters, output) -> {

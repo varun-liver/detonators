@@ -13,7 +13,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.network.PacketDistributor;
+
+import java.util.ArrayList;
 
 @Mod.EventBusSubscriber(modid = detonators.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class DetonatorForgeEvents {
@@ -30,11 +32,8 @@ public final class DetonatorForgeEvents {
 
         if (player.isShiftKeyDown()) {
             if (player instanceof ServerPlayer serverPlayer) {
-                NetworkHooks.openScreen(
-                        serverPlayer,
-                        new SimpleMenuProvider((id, inv, p) -> new DetonatorMenu(id, inv, det.getBlocks()), Component.literal("Detonator")),
-                        buf -> DetonatorMenu.writePositions(buf, det.getBlocks())
-                );
+                serverPlayer.openMenu(new SimpleMenuProvider((id, inv, p) -> new DetonatorMenu(id, inv), Component.literal("Detonator")));
+                ModNet.CHANNEL.send(new DetonatorPositionsS2CPacket(new ArrayList<>(det.getBlocks())), PacketDistributor.PLAYER.with(serverPlayer));
             }
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
@@ -52,4 +51,3 @@ public final class DetonatorForgeEvents {
         event.setCanceled(true);
     }
 }
-

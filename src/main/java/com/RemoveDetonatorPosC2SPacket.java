@@ -4,11 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 public final class RemoveDetonatorPosC2SPacket {
     private final int index;
@@ -25,8 +24,7 @@ public final class RemoveDetonatorPosC2SPacket {
         return new RemoveDetonatorPosC2SPacket(buf.readVarInt());
     }
 
-    public static void handle(RemoveDetonatorPosC2SPacket msg, Supplier<NetworkEvent.Context> ctxSupplier) {
-        NetworkEvent.Context ctx = ctxSupplier.get();
+    public static void handle(RemoveDetonatorPosC2SPacket msg, CustomPayloadEvent.Context ctx) {
         ctx.enqueueWork(() -> {
             ServerPlayer sender = ctx.getSender();
             if (sender == null) return;
@@ -40,10 +38,7 @@ public final class RemoveDetonatorPosC2SPacket {
 
             list.remove(idx);
 
-            ModNet.CHANNEL.send(
-                    PacketDistributor.PLAYER.with(() -> sender),
-                    new DetonatorPositionsS2CPacket(new ArrayList<>(list))
-            );
+            ModNet.CHANNEL.send(new DetonatorPositionsS2CPacket(new ArrayList<>(list)), PacketDistributor.PLAYER.with(sender));
         });
         ctx.setPacketHandled(true);
     }
@@ -56,4 +51,3 @@ public final class RemoveDetonatorPosC2SPacket {
         return null;
     }
 }
-

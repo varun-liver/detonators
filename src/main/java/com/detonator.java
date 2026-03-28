@@ -23,7 +23,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 
@@ -45,11 +45,8 @@ public class detonator extends Item{
 
         if (!level.isClientSide && player != null && player.isShiftKeyDown()) {
             if (player instanceof ServerPlayer serverPlayer) {
-                NetworkHooks.openScreen(
-                        serverPlayer,
-                        new SimpleMenuProvider((id, inv, p) -> new DetonatorMenu(id, inv, blocks), Component.literal("Detonator")),
-                        buf -> DetonatorMenu.writePositions(buf, blocks)
-                );
+                serverPlayer.openMenu(new SimpleMenuProvider((id, inv, p) -> new DetonatorMenu(id, inv), Component.literal("Detonator")));
+                ModNet.CHANNEL.send(new DetonatorPositionsS2CPacket(new ArrayList<>(blocks)), PacketDistributor.PLAYER.with(serverPlayer));
             }
             return InteractionResult.SUCCESS;
         }
@@ -70,11 +67,8 @@ public class detonator extends Item{
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if (!level.isClientSide && player.isShiftKeyDown()) {
             if (player instanceof ServerPlayer serverPlayer) {
-                NetworkHooks.openScreen(
-                        serverPlayer,
-                        new SimpleMenuProvider((id, inv, p) -> new DetonatorMenu(id, inv, blocks), Component.literal("Detonator")),
-                        buf -> DetonatorMenu.writePositions(buf, blocks)
-                );
+                serverPlayer.openMenu(new SimpleMenuProvider((id, inv, p) -> new DetonatorMenu(id, inv), Component.literal("Detonator")));
+                ModNet.CHANNEL.send(new DetonatorPositionsS2CPacket(new ArrayList<>(blocks)), PacketDistributor.PLAYER.with(serverPlayer));
             }
             return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide);
         }

@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Specification-Title: detonators
-Specification-Vendor: varun
-Specification-Version: 1
-Implementation-Title: detonators
-Implementation-Version: 1.0-SNAPSHOT
-Implementation-Vendor: varun
-Implementation-Timestamp: 2026-03-26T21:35:17-0700
-

@@ -13,7 +13,7 @@ base {
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 minecraft {
@@ -116,6 +116,20 @@ repositories {
     // Put repositories for dependencies here
     // ForgeGradle automatically adds the Forge maven and Maven Central for you
 
+    // IntelliJ's ijDownloadArtifact* tasks sometimes don't see ForgeGradle's injected repo for mapped artifacts.
+    // Adding this explicitly allows resolving coordinates like
+    // net.minecraftforge:forge:1.20.x-xx.x.x_mapped_official_1.20.x from the local FG cache.
+    def fgRepoCandidates = [
+            file("${gradle.gradleUserHomeDir}/caches/forge_gradle/minecraft_user_repo"),
+            file("${System.getProperty("user.home")}/.gradle/caches/forge_gradle/minecraft_user_repo"),
+    ].unique()
+
+    fgRepoCandidates.each { repoDir ->
+        if (repoDir.exists()) {
+            maven { url = repoDir.toURI() }
+        }
+    }
+
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:flat_dir_resolver
     // flatDir {
@@ -178,8 +192,23 @@ tasks.named('jar', Jar).configure {
                     "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")])
     }
 
-    // This is the preferred method to reobfuscate your jar file
-    finalizedBy 'reobfJar'
+    // ForgeGradle for 1.20.2+ no longer exposes a reobfJar task in this setup.
+    // The output in build/libs is the jar you upload.
+}
+
+// Some ForgeGradle/Minecraft versions no longer add a 'reobfJar' task.
+// Provide a compatibility alias so common modding docs/CI scripts still work.
+afterEvaluate {
+    if (tasks.findByName('reobfJar') == null) {
+        tasks.register('reobfJar') {
+            group = 'build'
+            description = 'Compatibility alias: builds the distributable jar in build/libs (no extra reobf step in this setup).'
+            dependsOn tasks.named('jar')
+            doLast {
+                logger.lifecycle("Built jar: ${tasks.named('jar').get().archiveFile.get().asFile}")
+            }
+        }
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
